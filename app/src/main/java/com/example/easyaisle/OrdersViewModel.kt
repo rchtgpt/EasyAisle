@@ -8,8 +8,62 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
 class OrdersViewModel : ViewModel() {
+    // input data: ["Amy Adams", "Paulette Mirez"]
+    // given a list of names of people, i want to fetch their object from esriFreshListOfOrders. this is what esriFreshListOfOrders looks like.
+//    [
+//    {
+//        "address": "380 New York Street (3.7 Miles Away)",
+//        "food_ordered": {
+//        "Apples": 6,
+//        "Diet Coke - 12 Pack": 2,
+//        "Eggs - 18 Count": 1,
+//        "Frozen Chicken - 4 Pack": 2,
+//        "Huggies Size 2 - 24 Pack": 2,
+//        "KELLOGGS Corn Flakes": 2,
+//        "Starbucks Breakfast Blend Grounds - Medium Roast": 2,
+//        "Wonder Bread": 3
+//    },
+//        "iconResId": 2,
+//        "item_count": 8,
+//        "name": "Amy Adams",
+//        "platform": "Instacart",
+//        "time": "12:15pm"
+//    },
+//    {
+//        "address": "67 La Jolla (4.2 Miles Away)",
+//        "food_ordered": {
+//        "Apples": 8,
+//        "Diet Coke - 12 Pack": 1,
+//        "Eggs - 18 Count": 1,
+//        "Frozen Chicken - 4 Pack": 1,
+//        "Jif Crunchy Peanut Butter": 1,
+//        "KELLOGGS Corn Flakes": 1,
+//        "Starbucks Breakfast Blend Grounds - Medium Roast": 1,
+//        "Wonder Bread": 1
+//    },
+//        "iconResId": 2,
+//        "item_count": 8,
+//        "name": "Paulette Mirez",
+//        "platform": "Uber Eats",
+//        "time": "1:00pm"
+//    },
+//    {
+//        "address": "312 Park Street (6.5 Miles Away)",
+//        "food_ordered": {
+//        "Apples": 8,
+//        "Eggs - 18 Count": 1,
+//        "KELLOGGS Corn Flakes": 1,
+//        "Starbucks Breakfast Blend Grounds - Medium Roast": 2,
+//        "Wonder Bread": 1
+//    },
+//        "iconResId": 2,
+//        "item_count": 5,
+//        "name": "Matt Argos",
+//        "platform": "DoorDash",
+//        "time": "12:15pm"
+//    }
+//    ]
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val esriFreshRef: DatabaseReference = database.getReference("EsriFresh")
     private val costcoRef: DatabaseReference = database.getReference("Costco")
@@ -124,3 +178,4 @@ class OrdersViewModel : ViewModel() {
         })
     }
 }
+

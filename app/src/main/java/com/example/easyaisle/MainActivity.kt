@@ -123,7 +123,7 @@ fun MyApp() {
     NavHost(navController, startDestination = "signInScreen") {
         composable("signInScreen") { SignInScreen(navController) }
         composable("homeScreen") { HomeScreen(OrdersViewModel(), navController) }
-        composable("listScreen") { ItemList(navController) }
+        composable("listScreen") { ItemList(navController, OrdersViewModel()) }
     }
 }
 
