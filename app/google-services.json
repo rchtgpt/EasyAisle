@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "881436415506",
+    "project_id": "easyaisle-6634e",
+    "storage_bucket": "easyaisle-6634e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881436415506:android:cec6ff06690b254bc62acb",
+        "android_client_info": {
+          "package_name": "com.example.easyaisle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM_P4ry8J6SRlSAfwojGV0-2qikdLwRE0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
