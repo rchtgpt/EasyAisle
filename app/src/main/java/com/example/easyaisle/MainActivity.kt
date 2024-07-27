@@ -1,10 +1,10 @@
 package com.example.easyaisle
 
+import OrdersViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.ColorRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,22 +15,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,15 +30,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.easyaisle.ui.theme.EasyAisleTheme
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,32 +47,32 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.easyaisle.ui.theme.ItemList
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,6 +93,7 @@ class MainActivity : ComponentActivity() {
             } else {
                 // Your main app content
                 EasyAisleTheme {
+                    FirebaseDatabase.getInstance().setPersistenceEnabled(true)
                     MyApp()
                 }
             }
@@ -134,8 +122,8 @@ fun MyApp() {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "signInScreen") {
         composable("signInScreen") { SignInScreen(navController) }
-        composable("homeScreen") { HomeScreen(navController) }
-        composable("listScreen") { ItemList(dummyData, navController) }
+        composable("homeScreen") { HomeScreen(OrdersViewModel(), navController) }
+        composable("listScreen") { ItemList(navController) }
     }
 }
 
@@ -193,7 +181,8 @@ fun CustomBottomNavBar(
             modifier = Modifier
                 .size(56.dp)
                 .align(Alignment.TopCenter)
-                .offset(y = 4.dp),
+                .offset(y = 4.dp)
+                .shadow(elevation = 12.dp, shape = CircleShape, ), // Add shadow here
             containerColor = Color(0xFFFF9800),
             elevation = FloatingActionButtonDefaults.elevation(
                 defaultElevation = 6.dp,
@@ -206,11 +195,6 @@ fun CustomBottomNavBar(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold
             )
-//            Icon(
-//                imageVector = Icons.Default.Add,
-//                contentDescription = "Add",
-//                tint = Color.White
-//            )
         }
     }
 }
@@ -233,19 +217,6 @@ fun IconButton(icon: Painter, onClick: () -> Unit) {
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun CustomBottomNavBarPreview() {
-//    CustomBottomNavBar(
-//        onHomeClick = { /* Do something */ },
-//        onHelpClick = { /* Do something */ },
-//        onGoClick = { /* Do something */ },
-//        onSettingsClick = { /* Do something */ },
-//        onProfileClick = { /* Do something */ }
-//    )
-//}
-
 
 //Composable for link account buttons
 @Composable
@@ -395,407 +366,3 @@ fun SignInScreen(navController: NavController) {
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            Image(
-                painter = painterResource(id = R.drawable.orders_header),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
-        },
-        bottomBar = {
-            CustomBottomNavBar(
-                onHomeClick = { /* Handle Home click */ },
-                onHelpClick = { /* Handle Search click */ },
-                onGoClick =  { navController.navigate("listScreen") },
-                onSettingsClick = { /* Handle Profile click */ },
-                onProfileClick = { /* Handle Center Button click */ }
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr) + 20.dp,
-                    top = innerPadding.calculateTopPadding() + 20.dp,
-                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr) + 20.dp,
-                    bottom = innerPadding.calculateBottomPadding() + 10.dp
-                )
-        ) {
-            items(storeOrders) { storeOrder ->
-                StoreOrderCard(storeOrder)
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun StoreOrderCard(storeOrder: StoreOrder) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp)
-            .border(
-                BorderStroke(2.dp, Color.Black),
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
-                    bottomStart = 16.dp,
-                    bottomEnd = 16.dp
-                )
-            )
-    ) {
-        Column(
-        ) {
-            // First card for the store name
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .border(
-                        BorderStroke(2.dp, Color.Black),
-                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-                    ),
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = storeOrder.storeColor
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.traderjoes),
-                        contentDescription = "Trader Joe's Logo",
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .align(Alignment.Center) // Align the image to the center horizontally
-                    )
-                }
-            }
-
-            // Second card for the list of orders
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
-                ) {
-                    storeOrder.orders.forEachIndexed { index, order ->
-                        OrderItem(order)
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun OrderItem(order: Order) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp)), // Add rounded corners to the parent card
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column {
-            // Black card displaying time
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Black),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = order.time,
-                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.White)
-                    )
-                }
-            }
-
-            // Gray card displaying other details
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
-                colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.gray_200)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "${order.customerName}, ${order.customerAddress}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Black,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = "${order.itemCount} Items in Cart",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.DarkGray
-                        )
-                    }
-
-                    if (order.iconResId != null) {
-                        Image(
-                            painter = painterResource(id = order.iconResId),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .size(24.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-// LIST PAGE START -------------------------------
-data class Person(val name: String, val items: List<String>, val orderStore: String)
-val dummyData = listOf(
-    Person(
-        name = "Amy Adams",
-        items = listOf("KELLOGG Corn Flakes - 1", "Eggs 18 Count - 1", "WonderBread - 3", "Apples - 6", "Frozen Chicken - 4 Pack - 2", "Diet Coke - 12 Pack - 2", "Huggies size 2 - 24 Pack - 2", "Starbucks Breakfast Blend Grounds - Medium Roast - 2"
-        ),
-        orderStore = "Uber Eats"
-    ),
-    Person(
-        name = "Paulette Mirez",
-        items = listOf("Apples - 8", "KELLOGGS Corn Flakes - 1", "Frozen Chicken - 4 Pack - 1", "WonderBread - 1", "Jif Crunchy Peanut Butter - 1", "Starbucks Breakfast Blend Grounds - Medium Roast - 1", "Eggs - 18 Count - 1", "Diet Coke - 12 Pack - 1"
-        ),
-        orderStore = "Instacart"
-    ),
-    Person(
-        name = "Matt Argos",
-        items = listOf("Eggs - 18 Count - 1", "WonderBread - 1", "Starbucks Breakfast Blend Grounds - Medium Roast - 1", "Apples - 8", "KELLOGGS Corn Flakes - 1"
-        ),
-        orderStore = "DoorDash"
-    )
-)
-
-@Composable
-fun ItemList(persons: List<Person>, navController: NavController) {
-    Scaffold(
-        topBar = {
-            Image(
-                painter = painterResource(id = R.drawable.list_header),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
-        },
-        bottomBar = {
-            CustomBottomNavBar(
-                onHomeClick = { navController.navigate("homeScreen") },
-                onHelpClick = { /* Handle Search click */ },
-                onGoClick =  { /* Handle Center Button click */ },
-                onSettingsClick = { /* Handle Settings click */ },
-                onProfileClick = { /* Handle Profile click */ }
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding) // Padding to avoid content overlap with top/bottom bars
-        ) {
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp) // Padding on both sides
-                    .clip(RoundedCornerShape(8.dp)) // Rounded edges
-                    .background(Color.Black)
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center, // Center align text horizontally
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "46 Items • 9 Stops",
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold // Optional: for emphasis
-                )
-            }
-
-            LazyColumn {
-                items(persons) { person ->
-                    Card(
-                        modifier = Modifier
-                            .padding(24.dp)
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFECECEC))
-                    ) {
-                        Column {
-                            // Header with logo and name
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color.Black)
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                // Name
-                                Text(
-                                    text = person.name,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    modifier = Modifier.align(Alignment.CenterVertically)
-                                )
-                                // Logo
-                                when (person.orderStore) {
-                                    "Uber Eats" -> Image(
-                                        painter = painterResource(id = R.drawable.uber_logo),
-                                        contentDescription = "Uber Eats Logo",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    "Instacart" -> Image(
-                                        painter = painterResource(id = R.drawable.instacart_logo),
-                                        contentDescription = "Instacart Logo",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    "DoorDash" -> Image(
-                                        painter = painterResource(id = R.drawable.doordash_logo),
-                                        contentDescription = "DoorDash Logo",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            }
-                        }
-                        Column {
-                            // Content
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Spacer(modifier = Modifier.height(0.dp))
-                                person.items.forEach { item ->
-                                    val (name, quantity) = item.split(" - ").let { it[0] to it[1] }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 3.dp),
-                                        verticalAlignment = Alignment.Top
-                                    ) {
-                                        // Bulleted list
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = "• $name",
-                                                fontSize = 16.sp,
-                                                color = Color.DarkGray,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(end = 40.dp),
-                                                overflow = TextOverflow.Ellipsis,
-                                                maxLines = Int.MAX_VALUE
-                                            )
-                                        }
-                                        // Quantity
-                                        Text(
-                                            text = quantity,
-                                            fontSize = 16.sp,
-                                            color = Color.DarkGray,
-                                            modifier = Modifier
-                                                .align(Alignment.CenterVertically)
-                                                .widthIn(min = 0.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MaterialTheme {
-        ItemList(dummyData, navController = rememberNavController())
-    }
-}
-
-
-// LIST PAGE END ---------------------------------
-
-
-
-data class StoreOrder(
-    val storeName: String,
-    val storeColor: Color,
-    val orders: List<Order>
-)
-
-data class Order(
-    val time: String,
-    val customerName: String,
-    val customerAddress: String,
-    val itemCount: Int,
-    val distance: String,
-    val iconResId: Int? = null
-)
-
-// Sample data
-val storeOrders = listOf(
-    StoreOrder(
-        "The Esri Grocery Store",
-        Color(0xFF4285F4),
-        listOf(
-            Order("12:00 PM", "Amy Adams", "844 West Ave", 18, "3 Miles Away", R.drawable.instacart_icon),
-            Order("12:15 PM", "Paulette Mires", "67 La Jolla", 12, "4 Miles Away", R.drawable.ubereats_icon),
-            Order("1:00 PM", "Matt Argos", "312 Park Street", 7, "6.5 miles away", R.drawable.doordash_icon)
-        )
-    ),
-    StoreOrder(
-        "STATER BROS: COLTON AVE",
-        Color(0xFFE74C3C),
-        listOf(
-            Order("3:15 PM", "Joe Albes", "34 Park Street", 11, "6.2 Miles Away", R.drawable.ubereats_icon),
-            Order("3:20 PM", "Rachel Strife"," 899 Arlington", 23, "4 Miles Away", R.drawable.doordash_icon)
-        )
-    ),
-    StoreOrder(
-        "ALDI: ALABAMA STREET",
-        Color(0xFFF39C12),
-        listOf(
-            Order("12:15 PM", "Someone", "Somewhere", 12, "4.2 Miles Away", R.drawable.instacart_icon)
-        )
-    )
-)

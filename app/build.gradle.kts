@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -60,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation (libs.androidx.core.splashscreen)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,4 +70,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation (libs.androidx.navigation.compose)
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+
+
 }
