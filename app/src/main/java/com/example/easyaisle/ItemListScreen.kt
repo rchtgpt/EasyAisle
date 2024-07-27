@@ -1,5 +1,7 @@
-package com.example.easyaisle.ui.theme
+package com.example.easyaisle
 
+import OrdersViewModel
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,8 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.easyaisle.CustomBottomNavBar
-import com.example.easyaisle.R
 
 // LIST PAGE START -------------------------------
 data class Person(val name: String, val items: List<String>, val orderStore: String)
@@ -43,7 +45,11 @@ val dummyData = listOf(
 )
 
 @Composable
-fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
+fun ItemList(viewModel: OrdersViewModel, navController: NavController, persons: List<Person> = dummyData) {
+
+    val selectedCustomerNames by viewModel.selectedCustomerNames.collectAsState()
+    Log.d("Jai Mata Di 3", selectedCustomerNames.toString())
+
     Scaffold(
         topBar = {
             Image(
@@ -56,10 +62,11 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
         bottomBar = {
             CustomBottomNavBar(
                 onHomeClick = { navController.navigate("homeScreen") },
-                onHelpClick = { /* Handle Search click */ },
-                onGoClick = { /* Handle Center Button click */ },
+                onHelpClick = { /* Handle Help click */ },
+                onGoClick = { /* Handle Go click */ },
                 onSettingsClick = { /* Handle Settings click */ },
-                onProfileClick = { /* Handle Profile click */ }
+                onProfileClick = { /* Handle Profile click */ },
+                isGoEnabled = selectedCustomerNames.isNotEmpty()
             )
         }
     ) { innerPadding ->

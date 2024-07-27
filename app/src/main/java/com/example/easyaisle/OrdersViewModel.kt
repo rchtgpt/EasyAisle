@@ -7,6 +7,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class OrdersViewModel : ViewModel() {
@@ -122,5 +125,60 @@ class OrdersViewModel : ViewModel() {
                 Log.w("Firebase Data", "loadPost:onCancelled", error.toException())
             }
         })
+    }
+
+    // order selection
+    private val _selectedOrders = MutableStateFlow<Set<String>>(emptySet())
+    val selectedOrders: StateFlow<Set<String>> = _selectedOrders.asStateFlow()
+
+    // selectedOrder: [EsriFresh:Amy Adams, EsriFresh:Paulette Mirez]
+    // i want my selectedCustomerNames to be a list that looks like this: ["Amy Adams", "Paulette Mirez"]
+
+    private val _selectedCustomerNames = MutableStateFlow<List<String>>(emptyList())
+    val selectedCustomerNames: StateFlow<List<String>> = _selectedCustomerNames.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            selectedOrders.collect { names ->
+                Log.d("Jai Mata Di 1", names.toString())
+                _selectedCustomerNames.value = names.map { order ->
+                    // Extract customer name by splitting on ':'
+                    order.substringAfter(':')
+                }
+                Log.d("Jai Mata Di 2", selectedCustomerNames.value.toString())
+            }
+        }
+    }
+
+
+
+    fun toggleOrderSelection(order: Order, storeName: String) {
+        val orderId = "$storeName:${order.name}"
+        _selectedOrders.update { currentSelection ->
+            if (currentSelection.isEmpty() || currentSelection.any { it.startsWith(storeName) }) {
+                if (orderId in currentSelection) {
+                    currentSelection - orderId
+                } else {
+                    currentSelection + orderId
+                }
+            } else {
+                currentSelection
+            }
+        }
+        updateSelectedCustomerNames()
+    }
+
+    private fun updateSelectedCustomerNames() {
+        _selectedCustomerNames.value = _selectedOrders.value.map { it.split(":")[1] }
+    }
+
+    fun clearSelection() {
+        _selectedOrders.value = emptySet()
+        _selectedCustomerNames.value = emptyList()
+    }
+
+    // Function to get the list of selected customer names
+    fun getSelectedCustomerNames(): List<String> {
+        return selectedCustomerNames.value
     }
 }

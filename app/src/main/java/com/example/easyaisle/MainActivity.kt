@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,19 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
@@ -71,7 +62,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.easyaisle.ui.theme.ItemList
 import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
@@ -123,7 +113,7 @@ fun MyApp() {
     NavHost(navController, startDestination = "signInScreen") {
         composable("signInScreen") { SignInScreen(navController) }
         composable("homeScreen") { HomeScreen(OrdersViewModel(), navController) }
-        composable("listScreen") { ItemList(navController) }
+        composable("listScreen") { ItemList(OrdersViewModel(), navController) }
     }
 }
 
@@ -135,7 +125,8 @@ fun CustomBottomNavBar(
     onHelpClick: () -> Unit,
     onGoClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    isGoEnabled: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -176,14 +167,18 @@ fun CustomBottomNavBar(
         }
 
         FloatingActionButton(
-            onClick = onGoClick,
+            onClick = {
+                if (isGoEnabled) {
+                    onGoClick()
+                }
+            },
             shape = CircleShape,
             modifier = Modifier
                 .size(56.dp)
                 .align(Alignment.TopCenter)
                 .offset(y = 4.dp)
-                .shadow(elevation = 12.dp, shape = CircleShape, ), // Add shadow here
-            containerColor = Color(0xFFFF9800),
+                .shadow(elevation = 12.dp, shape = CircleShape),
+            containerColor = if (isGoEnabled) Color(0xFFFF9800) else Color.Gray,
             elevation = FloatingActionButtonDefaults.elevation(
                 defaultElevation = 6.dp,
                 pressedElevation = 12.dp
