@@ -5,8 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.ColorRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,6 +56,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 
@@ -123,6 +126,7 @@ fun HomeScreen() {
                 )        ) {
             items(storeOrders) { storeOrder ->
                 StoreOrderCard(storeOrder)
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
@@ -130,28 +134,69 @@ fun HomeScreen() {
 
 @Composable
 fun StoreOrderCard(storeOrder: StoreOrder) {
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = storeOrder.storeColor
-        )
+            .padding(0.dp)
+            .border(
+                BorderStroke(2.dp, Color.Black),
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
+                    bottomStart = 16.dp,
+                    bottomEnd = 16.dp
+                )
+            )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = storeOrder.storeName,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White
-            )
-            storeOrder.orders.forEachIndexed { index, order ->
-                OrderItem(order)
+            // First card for the store name
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .border(
+                        BorderStroke(2.dp, Color.Black),
+                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    ),
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = storeOrder.storeColor
+                )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.traderjoes),
+                        contentDescription = "Trader Joe's Logo",
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .align(Alignment.Center) // Align the image to the center horizontally
+                    )
+                }
+            }
+
+            // Second card for the list of orders
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                ) {
+                    storeOrder.orders.forEachIndexed { index, order ->
+                        OrderItem(order)
+                    }
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun OrderItem(order: Order) {
@@ -279,5 +324,13 @@ val storeOrders = listOf(
 @Preview
 @Composable
 fun SimpleComposablePreview() {
-    OrderItem(Order("12:15 PM", "Someone", "Somewhere", 12, "4.2 Miles Away", R.drawable.instacart_icon))
+    StoreOrderCard(StoreOrder(
+        "The Esri Grocery Store",
+        Color(0xFF4285F4),
+        listOf(
+            Order("12:00 PM", "Amy Adams", "844 West Ave", 18, "3 Miles Away", R.drawable.instacart_icon),
+            Order("12:15 PM", "Paulette Mires", "67 La Jolla", 12, "4 Miles Away", R.drawable.ubereats_icon),
+            Order("1:00 PM", "Matt Argos", "312 Park Street", 7, "6.5 miles away", R.drawable.doordash_icon)
+        )
+    ))
 }
