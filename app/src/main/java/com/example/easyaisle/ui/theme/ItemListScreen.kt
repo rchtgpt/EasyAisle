@@ -1,5 +1,6 @@
 package com.example.easyaisle.ui.theme
 
+import OrdersViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,6 +9,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.easyaisle.CustomBottomNavBar
+import com.example.easyaisle.Order
 import com.example.easyaisle.R
+import coil.compose.AsyncImage
 
 // LIST PAGE START -------------------------------
 data class Person(val name: String, val items: List<String>, val orderStore: String)
@@ -43,7 +48,28 @@ val dummyData = listOf(
 )
 
 @Composable
-fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
+fun ImageFromUrl(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = null,
+        modifier = Modifier
+            .size(245.dp, 435.dp)
+            .padding(8.dp)
+    )
+}
+
+@Composable
+fun ItemList(navController: NavController, viewModel: OrdersViewModel, persons: List<Person> = dummyData) {
+    val selectedUsersFromAGroceryStore: Array<String> = arrayOf("Matt Argos", "Paulette Mirez")
+    val esriFreshListOfOrders by viewModel.esriFreshListOfOrders.collectAsState()
+
+
+    fun filterOrdersByName(names: Array<String> = selectedUsersFromAGroceryStore, orders: List<Order> = esriFreshListOfOrders): List<Order> {
+        return orders.filter { it.name in names }
+    }
+
+    val filteredOrders = filterOrdersByName()
+
     Scaffold(
         topBar = {
             Image(
@@ -89,7 +115,7 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
             }
 
             LazyColumn {
-                items(persons) { person ->
+                items(filteredOrders) { order ->
                     Card(
                         modifier = Modifier
                             .padding(24.dp)
@@ -109,18 +135,19 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                             ) {
                                 // Name
                                 Text(
-                                    text = person.name,
+                                    text = order.name,
                                     fontSize = 18.sp,
                                     color = Color.White,
                                     modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                                 // Logo
-                                when (person.orderStore) {
+                                when (order.platform) {
                                     "Uber Eats" -> Image(
                                         painter = painterResource(id = R.drawable.uber_logo),
                                         contentDescription = "Uber Eats Logo",
                                         modifier = Modifier.size(24.dp)
                                     )
+//                                    "Uber Eats" -> ImageFromUrl(url = "https://media.discordapp.net/attachments/766898740627767297/1266858124841582723/jif.png?ex=66a6ad12&is=66a55b92&hm=091651d688ab5c51dc091277134826b55e2e404c60be9104a36122351e4ceb1e&=&format=webp&quality=lossless&width=245&height=435")
                                     "Instacart" -> Image(
                                         painter = painterResource(id = R.drawable.instacart_logo),
                                         contentDescription = "Instacart Logo",
@@ -138,8 +165,7 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                             // Content
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Spacer(modifier = Modifier.height(0.dp))
-                                person.items.forEach { item ->
-                                    val (name, quantity) = item.split(" - ").let { it[0] to it[1] }
+                                order.food_ordered?.forEach { (name, quantity) ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -161,7 +187,7 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                                         }
                                         // Quantity
                                         Text(
-                                            text = quantity,
+                                            text = "$quantity",
                                             fontSize = 14.sp,
                                             color = Color.DarkGray,
                                             modifier = Modifier

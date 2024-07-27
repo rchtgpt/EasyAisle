@@ -8,7 +8,6 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
 class OrdersViewModel : ViewModel() {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val esriFreshRef: DatabaseReference = database.getReference("EsriFresh")
@@ -124,3 +123,4 @@ class OrdersViewModel : ViewModel() {
         })
     }
 }
+
