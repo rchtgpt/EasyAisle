@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.example.easyaisle.CustomBottomNavBar
 import com.example.easyaisle.Order
 import com.example.easyaisle.R
+import coil.compose.AsyncImage
 
 // LIST PAGE START -------------------------------
 data class Person(val name: String, val items: List<String>, val orderStore: String)
@@ -45,6 +46,17 @@ val dummyData = listOf(
         orderStore = "DoorDash"
     ),
 )
+
+@Composable
+fun ImageFromUrl(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = null,
+        modifier = Modifier
+            .size(245.dp, 435.dp)
+            .padding(8.dp)
+    )
+}
 
 @Composable
 fun ItemList(navController: NavController, viewModel: OrdersViewModel, persons: List<Person> = dummyData) {
@@ -135,6 +147,7 @@ fun ItemList(navController: NavController, viewModel: OrdersViewModel, persons: 
                                         contentDescription = "Uber Eats Logo",
                                         modifier = Modifier.size(24.dp)
                                     )
+//                                    "Uber Eats" -> ImageFromUrl(url = "https://media.discordapp.net/attachments/766898740627767297/1266858124841582723/jif.png?ex=66a6ad12&is=66a55b92&hm=091651d688ab5c51dc091277134826b55e2e404c60be9104a36122351e4ceb1e&=&format=webp&quality=lossless&width=245&height=435")
                                     "Instacart" -> Image(
                                         painter = painterResource(id = R.drawable.instacart_logo),
                                         contentDescription = "Instacart Logo",

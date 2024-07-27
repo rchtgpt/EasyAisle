@@ -81,13 +81,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-//            PersonList(dummyData)
             var showSplash by remember { mutableStateOf(true) }
 
             if (showSplash) {
                 SplashScreen()
                 LaunchedEffect(Unit) {
-                    delay(1500) // Show splash for 1 seconds
+                    delay(3000)
                     showSplash = false
                 }
             } else {
