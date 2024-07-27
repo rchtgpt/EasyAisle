@@ -50,15 +50,34 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +97,9 @@ class MainActivity : ComponentActivity() {
             } else {
                 // Your main app content
                 EasyAisleTheme {
-                    HomeScreen()
+                    MyApp()
+//                    SignInScreen()
+//                    HomeScreen()
                 }
             }
         }
@@ -100,6 +121,167 @@ fun SplashScreen() {
         )
     }
 }
+
+@Composable
+fun MyApp() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "signInScreen") {
+        composable("signInScreen") { SignInScreen(navController) }
+        composable("homeScreen") { HomeScreen() }
+    }
+}
+
+//Composable for link account buttons
+@Composable
+fun ImageButtonWithShadow(
+    modifier: Modifier = Modifier,
+    image: Painter,
+    backgroundColor: Color,
+) {
+    Surface(
+        modifier = modifier.shadow(elevation = 8 .dp, shape = RoundedCornerShape(16.dp), clip = false),
+        shape = RoundedCornerShape(16.dp),
+        color = backgroundColor
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Image(
+                painter = image,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(36.dp)
+                    .align(Alignment.Center),
+                contentScale = ContentScale.Fit // Maintain aspect ratio, fit inside bounds
+            )
+        }
+    }
+}
+
+// Composable function for the sign-in screen
+
+@Composable
+fun SignInScreen(navController: NavController) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.sign_in_header),
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.Crop
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+
+            // email and password input fields
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                colors = OutlinedTextFieldDefaults.colors(
+                    // unfocusedBorderColor = Color(0xFFB4B4B4),
+                    unfocusedLabelColor = Color(0xFFB4B4B4),
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                colors = OutlinedTextFieldDefaults.colors(
+                    // unfocusedBorderColor = Color(0xFFB4B4B4),
+                    unfocusedLabelColor = Color(0xFFB4B4B4),
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "need help?",
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                textAlign = TextAlign.End,
+                color = Color.Gray,
+                fontSize = 12.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // login and register buttons
+            Button(
+                onClick = { navController.navigate("homeScreen") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF7931E)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("LOG IN", color = Color.White)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { /* Handle register */ },
+                border = BorderStroke(1.dp, Color(0xFFF7931E)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("REGISTER", color = Color(0xFFF7931E))
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // link account buttons
+            Text("Link Your Accounts", color = Color.Gray, fontSize = 12.sp)
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                ImageButtonWithShadow(
+                    modifier = Modifier.size(80.dp, 30.dp),
+                    image = painterResource(id = R.drawable.uber_logo),
+                    backgroundColor = Color(0xFF142328)
+                )
+
+                ImageButtonWithShadow(
+                    modifier = Modifier.size(80.dp, 30.dp),
+                    image = painterResource(id = R.drawable.instacart_logo),
+                    backgroundColor = Color(0xFFFAF1E5)
+                )
+
+                ImageButtonWithShadow(
+                    modifier = Modifier.size(80.dp, 30.dp),
+                    image = painterResource(id = R.drawable.doordash_logo),
+                    backgroundColor = Color(0xFFFF3008)
+                )
+            }
+            Spacer(modifier = Modifier.height(36.dp))
+
+            // create personal account text
+            Row {
+                Text(text = "Not a Delivery Driver? ", color = Color.Gray, fontSize = 12.sp)
+                ClickableText(
+                    text = AnnotatedString("Create a Personal Account"),
+                    onClick = { /* Handle click */ },
+                    style = LocalTextStyle.current.copy(color = Color(0xFFF7931E), fontSize = 12.sp)
+                )
+            }
+        }
+    }
+}
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
