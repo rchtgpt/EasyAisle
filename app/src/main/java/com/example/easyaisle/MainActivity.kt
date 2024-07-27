@@ -8,20 +8,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +31,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -58,8 +48,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -126,7 +120,31 @@ fun MyApp() {
     }
 }
 
-// NAV BAR
+@Composable
+fun bottomBarShape(cutoutRadius: Float, cutoutHeightPx: Float): Shape {
+    return GenericShape { size: Size, _ ->
+        val width = size.width
+        val height = size.height
+        val centerX = width / 2
+
+        moveTo(0f, 0f)
+        lineTo(centerX - cutoutRadius - 20f, 0f)
+        cubicTo(
+            centerX - cutoutRadius, 0f,
+            centerX - cutoutRadius, cutoutHeightPx,
+            centerX, cutoutHeightPx
+        )
+        cubicTo(
+            centerX + cutoutRadius, cutoutHeightPx,
+            centerX + cutoutRadius, 0f,
+            centerX + cutoutRadius + 20f, 0f
+        )
+        lineTo(width, 0f)
+        lineTo(width, height)
+        lineTo(0f, height)
+        close()
+    }
+}
 
 @Composable
 fun CustomBottomNavBar(
@@ -136,60 +154,67 @@ fun CustomBottomNavBar(
     onSettingsClick: () -> Unit,
     onProfileClick: () -> Unit
 ) {
+    val cutoutRadius = with(LocalDensity.current) { 45.dp.toPx() }
+    val cutoutHeightPx = with(LocalDensity.current) { 28.dp.toPx() }
+
+    val shape = bottomBarShape(cutoutRadius, cutoutHeightPx)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
     ) {
         // Main bottom bar with cutout
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .background(
-                    color = Color.Black,
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    color = Color.Black,  // Adjust the color to match your design
+                    shape = shape
                 )
                 .height(56.dp)
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                icon = painterResource(id = R.drawable.ic_home),
-                onClick = onHomeClick
-            )
-            IconButton(
-                icon = painterResource(id = R.drawable.ic_help),
-                onClick = onHelpClick
-            )
-            Spacer(modifier = Modifier.width(56.dp)) // Space for FAB
-            IconButton(
-                icon = painterResource(id = R.drawable.ic_settings),
-                onClick = onSettingsClick
-            )
-            IconButton(
-                icon = painterResource(id = R.drawable.ic_profile),
-                onClick = onProfileClick
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    icon = painterResource(id = R.drawable.ic_home),
+                    onClick = onHomeClick
+                )
+                IconButton(
+                    icon = painterResource(id = R.drawable.ic_help),
+                    onClick = onHelpClick
+                )
+                Spacer(modifier = Modifier.width(56.dp)) // Space for FAB
+                IconButton(
+                    icon = painterResource(id = R.drawable.ic_settings),
+                    onClick = onSettingsClick
+                )
+                IconButton(
+                    icon = painterResource(id = R.drawable.ic_profile),
+                    onClick = onProfileClick
+                )
+            }
         }
 
+        // Floating Action Button
         FloatingActionButton(
             onClick = onGoClick,
             shape = CircleShape,
+            containerColor = Color(0xFFFF9600), // Adjust color as needed
             modifier = Modifier
-                .size(56.dp)
                 .align(Alignment.TopCenter)
-                .offset(y = 4.dp)
-                .shadow(elevation = 12.dp, shape = CircleShape, ), // Add shadow here
-            containerColor = Color(0xFFFF9800),
-            elevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = 6.dp,
-                pressedElevation = 12.dp
-            )
+                .offset(y = -30.dp)
+                .size(70.dp)
+                .shadow(elevation = 8.dp, shape = CircleShape)
         ) {
             Text(
-                text = "Go",
+                text = "GO!",
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold
@@ -225,7 +250,7 @@ fun ImageButtonWithShadow(
     backgroundColor: Color,
 ) {
     Surface(
-        modifier = modifier.shadow(elevation = 8 .dp, shape = RoundedCornerShape(16.dp), clip = false),
+        modifier = modifier.shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), clip = false),
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor
     ) {
