@@ -618,7 +618,7 @@ fun ItemList(persons: List<Person>, navController: NavController) {
         },
         bottomBar = {
             CustomBottomNavBar(
-                onHomeClick = { /* Handle Home click */ },
+                onHomeClick = { navController.navigate("homeScreen") },
                 onHelpClick = { /* Handle Search click */ },
                 onGoClick =  { /* Handle Center Button click */ },
                 onSettingsClick = { /* Handle Settings click */ },
