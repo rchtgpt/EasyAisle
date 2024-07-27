@@ -9,6 +9,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
@@ -49,12 +51,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
@@ -86,20 +94,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+//            PersonList(dummyData)
             var showSplash by remember { mutableStateOf(true) }
 
             if (showSplash) {
                 SplashScreen()
                 LaunchedEffect(Unit) {
-                    delay(3000) // Show splash for 3 seconds
+                    delay(1500) // Show splash for 1 seconds
                     showSplash = false
                 }
             } else {
                 // Your main app content
                 EasyAisleTheme {
                     MyApp()
-//                    SignInScreen()
-//                    HomeScreen()
                 }
             }
         }
@@ -127,9 +134,118 @@ fun MyApp() {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "signInScreen") {
         composable("signInScreen") { SignInScreen(navController) }
-        composable("homeScreen") { HomeScreen() }
+        composable("homeScreen") { HomeScreen(navController) }
+        composable("listScreen") { ItemList(dummyData, navController) }
     }
 }
+
+// NAV BAR
+
+@Composable
+fun CustomBottomNavBar(
+    onHomeClick: () -> Unit,
+    onHelpClick: () -> Unit,
+    onGoClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+    ) {
+        // Main bottom bar with cutout
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .background(
+                    color = Color.Black,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                )
+                .height(56.dp)
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                icon = painterResource(id = R.drawable.ic_home),
+                onClick = onHomeClick
+            )
+            IconButton(
+                icon = painterResource(id = R.drawable.ic_help),
+                onClick = onHelpClick
+            )
+            Spacer(modifier = Modifier.width(56.dp)) // Space for FAB
+            IconButton(
+                icon = painterResource(id = R.drawable.ic_settings),
+                onClick = onSettingsClick
+            )
+            IconButton(
+                icon = painterResource(id = R.drawable.ic_profile),
+                onClick = onProfileClick
+            )
+        }
+
+        FloatingActionButton(
+            onClick = onGoClick,
+            shape = CircleShape,
+            modifier = Modifier
+                .size(56.dp)
+                .align(Alignment.TopCenter)
+                .offset(y = 4.dp),
+            containerColor = Color(0xFFFF9800),
+            elevation = FloatingActionButtonDefaults.elevation(
+                defaultElevation = 6.dp,
+                pressedElevation = 12.dp
+            )
+        ) {
+            Text(
+                text = "Go",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+//            Icon(
+//                imageVector = Icons.Default.Add,
+//                contentDescription = "Add",
+//                tint = Color.White
+//            )
+        }
+    }
+}
+
+@Composable
+fun IconButton(icon: Painter, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .padding(8.dp)
+    ) {
+        Image(
+            painter = icon,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent)
+                .clickable(onClick = onClick),
+            contentScale = ContentScale.Fit
+        )
+    }
+}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun CustomBottomNavBarPreview() {
+//    CustomBottomNavBar(
+//        onHomeClick = { /* Do something */ },
+//        onHelpClick = { /* Do something */ },
+//        onGoClick = { /* Do something */ },
+//        onSettingsClick = { /* Do something */ },
+//        onProfileClick = { /* Do something */ }
+//    )
+//}
+
 
 //Composable for link account buttons
 @Composable
@@ -280,20 +396,25 @@ fun SignInScreen(navController: NavController) {
     }
 }
 
-
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("CLAIMED ORDERS") },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = Color.Black,
-                    titleContentColor = Color.White
-                )
+            Image(
+                painter = painterResource(id = R.drawable.orders_header),
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.Crop
+            )
+        },
+        bottomBar = {
+            CustomBottomNavBar(
+                onHomeClick = { /* Handle Home click */ },
+                onHelpClick = { /* Handle Search click */ },
+                onGoClick =  { navController.navigate("listScreen") },
+                onSettingsClick = { /* Handle Profile click */ },
+                onProfileClick = { /* Handle Center Button click */ }
             )
         }
     ) { innerPadding ->
@@ -304,8 +425,9 @@ fun HomeScreen() {
                     start = innerPadding.calculateStartPadding(LayoutDirection.Ltr) + 20.dp,
                     top = innerPadding.calculateTopPadding() + 20.dp,
                     end = innerPadding.calculateEndPadding(LayoutDirection.Ltr) + 20.dp,
-                    bottom = innerPadding.calculateBottomPadding() + 20.dp
-                )        ) {
+                    bottom = innerPadding.calculateBottomPadding() + 10.dp
+                )
+        ) {
             items(storeOrders) { storeOrder ->
                 StoreOrderCard(storeOrder)
                 Spacer(modifier = Modifier.height(20.dp))
@@ -460,6 +582,181 @@ fun OrderItem(order: Order) {
     }
 }
 
+// LIST PAGE START -------------------------------
+data class Person(val name: String, val items: List<String>, val orderStore: String)
+val dummyData = listOf(
+    Person(
+        name = "Amy Adams",
+        items = listOf("KELLOGG Corn Flakes - 1", "Eggs 18 Count - 1", "WonderBread - 3", "Apples - 6", "Frozen Chicken - 4 Pack - 2", "Diet Coke - 12 Pack - 2", "Huggies size 2 - 24 Pack - 2", "Starbucks Breakfast Blend Grounds - Medium Roast - 2"
+        ),
+        orderStore = "Uber Eats"
+    ),
+    Person(
+        name = "Paulette Mirez",
+        items = listOf("Apples - 8", "KELLOGGS Corn Flakes - 1", "Frozen Chicken - 4 Pack - 1", "WonderBread - 1", "Jif Crunchy Peanut Butter - 1", "Starbucks Breakfast Blend Grounds - Medium Roast - 1", "Eggs - 18 Count - 1", "Diet Coke - 12 Pack - 1"
+        ),
+        orderStore = "Instacart"
+    ),
+    Person(
+        name = "Matt Argos",
+        items = listOf("Eggs - 18 Count - 1", "WonderBread - 1", "Starbucks Breakfast Blend Grounds - Medium Roast - 1", "Apples - 8", "KELLOGGS Corn Flakes - 1"
+        ),
+        orderStore = "DoorDash"
+    )
+)
+
+@Composable
+fun ItemList(persons: List<Person>, navController: NavController) {
+    Scaffold(
+        topBar = {
+            Image(
+                painter = painterResource(id = R.drawable.list_header),
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.Crop
+            )
+        },
+        bottomBar = {
+            CustomBottomNavBar(
+                onHomeClick = { /* Handle Home click */ },
+                onHelpClick = { /* Handle Search click */ },
+                onGoClick =  { /* Handle Center Button click */ },
+                onSettingsClick = { /* Handle Settings click */ },
+                onProfileClick = { /* Handle Profile click */ }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding) // Padding to avoid content overlap with top/bottom bars
+        ) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp) // Padding on both sides
+                    .clip(RoundedCornerShape(8.dp)) // Rounded edges
+                    .background(Color.Black)
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center, // Center align text horizontally
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "46 Items • 9 Stops",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold // Optional: for emphasis
+                )
+            }
+
+            LazyColumn {
+                items(persons) { person ->
+                    Card(
+                        modifier = Modifier
+                            .padding(24.dp)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFECECEC))
+                    ) {
+                        Column {
+                            // Header with logo and name
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.Black)
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                // Name
+                                Text(
+                                    text = person.name,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                // Logo
+                                when (person.orderStore) {
+                                    "Uber Eats" -> Image(
+                                        painter = painterResource(id = R.drawable.uber_logo),
+                                        contentDescription = "Uber Eats Logo",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    "Instacart" -> Image(
+                                        painter = painterResource(id = R.drawable.instacart_logo),
+                                        contentDescription = "Instacart Logo",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    "DoorDash" -> Image(
+                                        painter = painterResource(id = R.drawable.doordash_logo),
+                                        contentDescription = "DoorDash Logo",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        }
+                        Column {
+                            // Content
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Spacer(modifier = Modifier.height(0.dp))
+                                person.items.forEach { item ->
+                                    val (name, quantity) = item.split(" - ").let { it[0] to it[1] }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 3.dp),
+                                        verticalAlignment = Alignment.Top
+                                    ) {
+                                        // Bulleted list
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "• $name",
+                                                fontSize = 16.sp,
+                                                color = Color.DarkGray,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(end = 40.dp),
+                                                overflow = TextOverflow.Ellipsis,
+                                                maxLines = Int.MAX_VALUE
+                                            )
+                                        }
+                                        // Quantity
+                                        Text(
+                                            text = quantity,
+                                            fontSize = 16.sp,
+                                            color = Color.DarkGray,
+                                            modifier = Modifier
+                                                .align(Alignment.CenterVertically)
+                                                .widthIn(min = 0.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    MaterialTheme {
+        ItemList(dummyData, navController = rememberNavController())
+    }
+}
+
+
+// LIST PAGE END ---------------------------------
+
+
+
 data class StoreOrder(
     val storeName: String,
     val storeColor: Color,
@@ -502,17 +799,3 @@ val storeOrders = listOf(
         )
     )
 )
-
-@Preview
-@Composable
-fun SimpleComposablePreview() {
-    StoreOrderCard(StoreOrder(
-        "The Esri Grocery Store",
-        Color(0xFF4285F4),
-        listOf(
-            Order("12:00 PM", "Amy Adams", "844 West Ave", 18, "3 Miles Away", R.drawable.instacart_icon),
-            Order("12:15 PM", "Paulette Mires", "67 La Jolla", 12, "4 Miles Away", R.drawable.ubereats_icon),
-            Order("1:00 PM", "Matt Argos", "312 Park Street", 7, "6.5 miles away", R.drawable.doordash_icon)
-        )
-    ))
-}
