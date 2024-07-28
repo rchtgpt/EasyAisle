@@ -121,11 +121,9 @@ class OrdersViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             selectedOrders.collect { names ->
-                Log.d("Jai Mata Di 1", names.toString())
                 _selectedCustomerNames.value = names.map { order ->
                     order.substringAfter(':')
                 }
-                Log.d("Jai Mata Di 2", selectedCustomerNames.value.toString())
             }
         }
     }

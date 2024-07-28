@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("io.coil-kt:coil-compose:2.0.0")
+    implementation("androidx.compose.material:material-icons-extended:1.0.0")
 
 
 

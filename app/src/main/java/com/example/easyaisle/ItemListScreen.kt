@@ -1,10 +1,13 @@
 package com.example.easyaisle
 
 import OrdersViewModel
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,7 +29,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.compose.material.icons.Icons
 import coil.compose.AsyncImage
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.scale
 
 // LIST PAGE START -------------------------------
 data class Person(val name: String, val items: List<String>, val orderStore: String)
@@ -64,7 +72,6 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
     val selectedUsersFromAGroceryStore: Array<String> = arrayOf("Matt Argos", "Paulette Mirez")
     val viewModel: OrdersViewModel = viewModel(LocalContext.current as ComponentActivity)
     val selectedCustomerNames by viewModel.selectedCustomerNames.collectAsState()
-    Log.d("Jai Mata Di 3", selectedCustomerNames.toString())
     val esriFreshListOfOrders by viewModel.esriFreshListOfOrders.collectAsState()
 
 
@@ -93,10 +100,17 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
             )
         },
         bottomBar = {
+            val context = LocalContext.current
+            val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://devrt00020.esri.com/portal/apps/indoors/index.html?appid=368ca23be82d45348caf1bfc628fae4c")) }
+
             CustomBottomNavBar(
                 onHomeClick = { navController.navigate("homeScreen") },
                 onHelpClick = { /* Handle Help click */ },
-                onGoClick = { /* Handle Go click */ },
+                onGoClick = {
+                    Log.d("jai mata di", "i'm inside")
+                    context.startActivity(intent)
+
+                },
                 onSettingsClick = { /* Handle Settings click */ },
                 onProfileClick = { /* Handle Profile click */ },
                 isGoEnabled = selectedCustomerNames.isNotEmpty()
@@ -116,8 +130,8 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                     .padding(horizontal = 24.dp) // Padding on both sides
                     .clip(RoundedCornerShape(8.dp)) // Rounded edges
                     .background(Color.Black)
-                    .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.Center, // Center align text horizontally
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -126,6 +140,23 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold // Optional: for emphasis
                 )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF1B5E20))
+                        .clickable {
+                            navController.navigate("homeScreen")
+                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Check Icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
 
             LazyColumn {
