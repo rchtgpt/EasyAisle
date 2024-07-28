@@ -112,8 +112,8 @@ fun MyApp() {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "signInScreen") {
         composable("signInScreen") { SignInScreen(navController) }
-        composable("homeScreen") { HomeScreen(OrdersViewModel(), navController) }
-        composable("listScreen") { ItemList(OrdersViewModel(), navController) }
+        composable("homeScreen") { HomeScreen(navController) }
+        composable("listScreen") { ItemList(navController) }
     }
 }
 

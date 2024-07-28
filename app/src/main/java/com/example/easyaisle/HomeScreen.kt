@@ -2,6 +2,7 @@ package com.example.easyaisle
 
 import OrdersViewModel
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -30,13 +31,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: OrdersViewModel, navController: NavController) {
+fun HomeScreen(navController: NavController) {
+    val viewModel: OrdersViewModel = viewModel(LocalContext.current as ComponentActivity)
     val esriFreshListOfOrders by viewModel.esriFreshListOfOrders.collectAsState()
     val costcoListOfOrders by viewModel.costcoListOfOrders.collectAsState()
     val traderJoesListOfOrders by viewModel.traderJoesListOfOrders.collectAsState()
@@ -79,7 +82,6 @@ fun HomeScreen(viewModel: OrdersViewModel, navController: NavController) {
                 onHelpClick = { /* Handle Search click */ },
                 onGoClick = {
                     if (selectedCustomerNames.isNotEmpty()) {
-                        // sending selected customer names to list screen -- Rachit
                         navController.navigate("listScreen")
                     }
                 },
