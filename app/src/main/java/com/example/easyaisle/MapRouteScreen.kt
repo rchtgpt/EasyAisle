@@ -46,7 +46,9 @@ fun MapRouteScreen(navController: NavController) {
                 .fillMaxWidth()
                 .height(700.dp)
                 .background(Color.Gray)
-        ) {}
+        ) {
+
+        }
         // Grey box end -----------------
 
         // Column for yellow card with no padding
