@@ -130,33 +130,17 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                     .padding(horizontal = 24.dp) // Padding on both sides
                     .clip(RoundedCornerShape(8.dp)) // Rounded edges
                     .background(Color.Black)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center // Center the content horizontally
             ) {
                 Text(
-                    text = "${totalItems} Items • ${totalUniqueItems} Stops",
+                    text = "$totalItems Items • $totalUniqueItems Stops",
                     color = Color.White,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold // Optional: for emphasis
+                    fontWeight = FontWeight.SemiBold
                 )
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF1B5E20))
-                        .clickable {
-                            navController.navigate("orderCompleteScreen")
-                        }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = "Check Icon",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
             }
 
             LazyColumn {

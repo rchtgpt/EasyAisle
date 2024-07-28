@@ -37,6 +37,12 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -81,11 +87,24 @@ fun createMap(): ArcGISMap {
     return ArcGISMap(portalItem)
 }
 
+val firstStop = Point(-13046046.900856, 4036399.683771, SpatialReference.webMercator())
+val secondStop = Point(-13046036.3046, 4036419.0599, SpatialReference.webMercator())
+val thirdStop = Point(-13046055.704331, 4036420.106326, SpatialReference.webMercator())
+val fourthStop = Point(-13046056.506471, 4036433.74105, SpatialReference.webMercator())
+val fifthStop = Point(-13046082.906481,4036433.35596, SpatialReference.webMercator())
+val sixthStop = Point( -13046079.705261, 4036425.944223, SpatialReference.webMercator())
+val seventhStop = Point(-13046071.040149,4036417.454062, SpatialReference.webMercator())
+val eighthStop = Point(-13046069.302058,	4036406.718944, SpatialReference.webMercator())
+val ninthStop = Point(-13046070.900848,	4036399.658887, SpatialReference.webMercator())
+
+
 @Composable
 fun MapRouteScreen(navController: NavController) {
     val map = remember { createMap() }
     val mapViewProxy = MapViewProxy()
     val coroutineScope = rememberCoroutineScope()
+    var departClickCount by remember { mutableIntStateOf(0) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -107,12 +126,6 @@ fun MapRouteScreen(navController: NavController) {
             }
         }
         }
-
-        Button(onClick = {
-            animateToStart(coroutineScope,mapViewProxy)
-        }) {
-           Text("Click me")
-        }
         // Grey box end -----------------
 
         // Column for yellow card with no padding
@@ -131,7 +144,23 @@ fun MapRouteScreen(navController: NavController) {
                     .padding(16.dp)
             ) {
                 items(directions) { direction ->
-                    DirectionItem(direction)
+                    DirectionItem(
+                        direction = direction,
+                        onStartClick = { animateToStart(coroutineScope,mapViewProxy, firstStop) },
+                        onDepartClick = {
+                            when (departClickCount) {
+                                0 -> { animateToStart(coroutineScope,mapViewProxy, secondStop) }
+                                1 -> { animateToStart(coroutineScope,mapViewProxy, thirdStop)}
+                                2 -> { animateToStart(coroutineScope,mapViewProxy, fourthStop)}
+                                3 -> { animateToStart(coroutineScope,mapViewProxy, fifthStop) }
+                                4 -> { animateToStart(coroutineScope,mapViewProxy, sixthStop) }
+                                5 -> { animateToStart(coroutineScope,mapViewProxy, seventhStop) }
+                                6 -> { animateToStart(coroutineScope,mapViewProxy, eighthStop) }
+                            }
+                            departClickCount++
+                        },
+                        onFinishClick = { navController.navigate("orderCompleteScreen") }
+                    )
                 }
             }
         }
@@ -140,29 +169,23 @@ fun MapRouteScreen(navController: NavController) {
 
 private fun animateToStart(
     coroutineScope: CoroutineScope,
-    mapViewProxy: MapViewProxy
+    mapViewProxy: MapViewProxy,
+    destinationStop: Point
 ) {
-    // val londonPoint = Point(-14093.0, 6711377.0, SpatialReference.webMercator())
-    val firstStop = Point(-13046046.900856, 4036399.683771, SpatialReference.webMercator())
-    val secondStop = Point(-13046036.3046, 4036419.0599, SpatialReference.webMercator())
-    val thirdStop = Point(-13046055.704331, 4036420.106326, SpatialReference.webMercator())
-    val fourthStop = Point(-13046056.506471, 4036433.74105, SpatialReference.webMercator())
-    val fifthStop = Point(-13046082.906481,4036433.35596, SpatialReference.webMercator())
-    val sixthStop = Point( -13046079.705261, 4036425.944223, SpatialReference.webMercator())
-    val seventhStop = Point(-13046071.040149,4036417.454062, SpatialReference.webMercator())
-    val eighthStop = Point(-13046069.302058,	4036406.718944, SpatialReference.webMercator())
-    val ninthStop = Point(-13046070.900848,	4036399.658887, SpatialReference.webMercator())
-
-
     // create the viewpoint with the London point and scale
-    val viewpoint = Viewpoint(firstStop, 150.0)
+    val viewpoint = Viewpoint(destinationStop, 150.0)
     coroutineScope.launch {
         mapViewProxy.setViewpointAnimated(viewpoint, 2.seconds)
     }
 }
 
 @Composable
-fun DirectionItem(direction: String) {
+fun DirectionItem(
+    direction: String,
+    onStartClick: () -> Unit,
+    onDepartClick: () -> Unit,
+    onFinishClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,11 +199,54 @@ fun DirectionItem(direction: String) {
             tint = Color.Black
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = direction,
-            color = Color.Black,
-            style = MaterialTheme.typography.bodyMedium
-        )
+        when {
+            direction == "START" -> {
+                Button(
+                    onClick = onStartClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = direction,
+                        color = Color(0xFFFFA500),
+                        modifier = Modifier
+                    )
+                }
+            }
+            direction == "DEPART" -> {
+                Button(
+                    onClick = onDepartClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = "NEXT",
+                        color = Color(0xFFFFA500),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            direction == "FINISH" -> {
+                Button(
+                    onClick = onFinishClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = "FINISH",
+                        color = Color(0xFFFFA500),
+                        modifier = Modifier
+                    )
+                }
+            }
+            else -> {
+                Text(
+                    text = direction,
+                    color = Color.Black,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }
 
@@ -191,129 +257,42 @@ fun getDirectionIcon(direction: String): ImageVector {
         direction.startsWith("Turn right") -> Icons.Default.ArrowForward
         direction.startsWith("Turn left") -> Icons.Default.ArrowBack
         direction.startsWith("Arrive") -> Icons.Default.LocationOn
-        direction.startsWith("Depart") -> Icons.Default.ExitToApp
-        direction.startsWith("Start") -> Icons.Default.PlayArrow
-        direction.startsWith("Finish") -> Icons.Default.CheckCircle
+        direction.startsWith("DEPART") -> Icons.Default.ExitToApp
+        direction.startsWith("START") -> Icons.Default.PlayArrow
+        direction.startsWith("FINISH") -> Icons.Default.CheckCircle
         else -> Icons.Default.ArrowForward
     }
 }
 
 val directions = listOf(
-    "Start",
+    "START",
     "Go forward 73 ft ~ < 1 min",
     "Turn right 11 ft ~ < 1 min",
     "Arrive, on the left",
-    "Depart",
+    "DEPART",
     "Go forward 53 ft ~ < 1 min",
     "Turn right 23 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 46 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward < 1 ft ~ < 1 min",
     "Turn right near bathroom 87 ft ~ < 1 min",
     "Turn left < 1 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 29 ft ~ < 1 min",
     "Arrive, on the left",
-    "Depart",
+    "DEPART",
     "Go forward 28 ft ~ < 1 min",
     "Turn left 28 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 6 ft ~ < 1 min",
     "Turn right 35 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 25 ft ~ < 1 min",
-    "Finish, on the left"
+    "FINISH"
 )
-
-// OLD CODE
-
-//Box(
-//modifier = Modifier.fillMaxSize()
-//) {
-//    Row(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(start = 48.dp, top = 12.dp, end = 48.dp, bottom = 12.dp),
-//        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.SpaceBetween
-//    ) {
-//        IconButton(onClick = { /* Handle left button click */ }) {
-//            Icon(
-//                painter = painterResource(id = R.drawable.big_arrow_left),
-//                contentDescription = "Previous"
-//            )
-//        }
-//
-//        Box(
-//            modifier = Modifier
-//                .size(200.dp)
-//                .background(
-//                    color = Color.White,
-//                    shape = RoundedCornerShape(16.dp)
-//                )
-//                .padding(16.dp)
-//        ) {
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(top = 8.dp)
-//            ) {
-//                Text(
-//                    text = "Corn Flakes",
-//                    fontSize = 20.sp,
-//                    fontWeight = FontWeight.SemiBold,
-//                    modifier = Modifier.align(Alignment.CenterHorizontally)
-//                )
-//
-//                Spacer(modifier = Modifier.height(8.dp))
-//
-//                Image(
-//                    painter = painterResource(id = R.drawable.uber_logo),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .size(125.dp)
-//                        .align(Alignment.CenterHorizontally),
-//                    contentScale = ContentScale.Crop
-//                )
-//            }
-//        }
-//
-//        IconButton(onClick = { /* Handle right button click */ }) {
-//            Icon(
-//                painter = painterResource(id = R.drawable.big_arrow_right),
-//                contentDescription = "Next"
-//            )
-//        }
-//    }
-//}
-
-// Black bar at the bottom
-//Text(
-//    text = "Amy (x1)  Paulette (x1)  Matt (x1)",
-//    fontSize = 20.sp,
-//    textAlign = TextAlign.Center,
-//    modifier = Modifier
-//    .fillMaxWidth()
-//    .background(Color.Black)
-//    .padding(8.dp),
-//    color = Color.White
-//)
-
-//@Composable
-//fun IconButton(onClick: () -> Unit, content: @Composable () -> Unit) {
-//    Box(
-//        modifier = Modifier
-//            .size(36.dp)
-//            .padding(0.dp)
-//            .clickable(onClick = onClick),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        content()
-//    }
-//}
