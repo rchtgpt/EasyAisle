@@ -11,7 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -27,29 +31,34 @@ fun OrderCompleteScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(Color(0xFFFFA726), Color(0xFFFF9800))))
-            .padding(16.dp),
+            .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Route Complete!",
-                color = Color.White,
-                fontSize = 24.sp,
+                text = "All Items Collected!",
+                color = Color.Black,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold
             )
-
+            Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "Complete Transaction using your Delivery App",
+                text = buildAnnotatedString {
+                    append("You have completed your order ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Yellow)) {
+                        append("in the most efficient way possible")
+                    }
+                    append(". Let your customers know on the following apps!")
+                },
                 color = Color.White,
-                fontSize = 16.sp
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
             )
-
             Spacer(modifier = Modifier.height(32.dp))
 
             Row(
@@ -57,17 +66,17 @@ fun OrderCompleteScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 ImageButtonWithShadow(
-                    modifier = Modifier.size(100.dp, 40.dp),
+                    modifier = Modifier.size(80.dp, 40.dp),
                     image = painterResource(id = R.drawable.uber_logo),
                     backgroundColor = Color(0xFF142328)
                 )
                 ImageButtonWithShadow(
-                    modifier = Modifier.size(100.dp, 40.dp),
+                    modifier = Modifier.size(80.dp, 40.dp),
                     image = painterResource(id = R.drawable.instacart_logo),
                     backgroundColor = Color(0xFFFAF1E5)
                 )
                 ImageButtonWithShadow(
-                    modifier = Modifier.size(100.dp, 40.dp),
+                    modifier = Modifier.size(80.dp, 40.dp),
                     image = painterResource(id = R.drawable.doordash_logo),
                     backgroundColor = Color(0xFFD32F2F)
                 )
@@ -82,7 +91,7 @@ fun OrderCompleteScreen(
             ) {
                 Text(
                     text = "NEW ORDER",
-                    color = Color(0xFFFF9800),
+                    color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )

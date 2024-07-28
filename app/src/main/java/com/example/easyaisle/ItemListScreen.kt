@@ -147,7 +147,7 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                         .clip(CircleShape)
                         .background(Color(0xFF1B5E20))
                         .clickable {
-                            navController.navigate("homeScreen")
+                            navController.navigate("orderCompleteScreen")
                         }
                 ) {
                     Icon(

@@ -109,6 +109,7 @@ fun MyApp() {
         composable("signInScreen") { SignInScreen(navController) }
         composable("homeScreen") { HomeScreen(navController) }
         composable("listScreen") { ItemList(navController) }
+        composable("orderCompleteScreen") { OrderCompleteScreen(navController)}
     }
 }
 
