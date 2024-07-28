@@ -32,23 +32,51 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.portal.Portal
+import com.arcgismaps.toolkit.geoviewcompose.MapView
+import androidx.compose.runtime.remember
+import com.arcgismaps.ApiKey
+import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.mapping.PortalItem
+
+private fun setApiKey() {
+    ArcGISEnvironment.apiKey = ApiKey.create("AAPTxy8BH1VEsoebNVZXo8HurARQG1ySTwuxT06quT27YX0dgRgL2iTC2RGhcTYanKpfuZhOI75rOh8AoqmEHbElaG53UKO9OPuDPj64JvJvXpO3kmzP-NQjXuG2VrRKdmSvzU7cXc0nF4NtqXLkxu9gqyAai3khLwDmVSHatvc1YXeCz04nVeYGCQu2lcT2GJ3XvkaYzKfZPPeS2vbEIqIfEP4nrDCTxdT-EWc8prmqsvw.AT1_r6BYalJ9")
+}
+
+fun createMap(): ArcGISMap {
+    setApiKey()
+
+    val portal = Portal(
+        url = "https://www.arcgis.com",
+        connection = Portal.Connection.Anonymous
+    )
+
+    val portalItem = PortalItem(
+        portal = portal,
+        itemId = "17169924253f44fca1870c65f3327066"
+    )
+
+    return ArcGISMap(portalItem)
+
+}
 
 @Composable
 fun MapRouteScreen(navController: NavController) {
+    val map = remember { createMap() }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Gray)
     ) {
         // Grey box at the top -- Rachit --------
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp)
-                .background(Color.Gray)
-        ) {
-
-        }
+        MapView(
+            modifier = Modifier.fillMaxWidth().height(500.dp).padding(10.dp),
+            arcGISMap = map
+        )
         // Grey box end -----------------
 
         // Column for yellow card with no padding

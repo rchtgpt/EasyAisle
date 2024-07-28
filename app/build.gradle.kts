@@ -79,6 +79,11 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.0.0")
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.coil.compose)
+    // ArcGIS Map Kotlin SDK dependencies
+    implementation("com.esri:arcgis-maps-kotlin:200.4.0")
+    // Toolkit dependencies
+    implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.4.0"))
+    implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
 
 
 
