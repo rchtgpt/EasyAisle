@@ -86,7 +86,7 @@ fun HomeScreen(navController: NavController) {
                     }
                 },
                 onSettingsClick = { /* Handle Profile click */ },
-                onProfileClick = { /* Handle Center Button click */ },
+                onProfileClick = { /* Handle Settings click */ },
                 isGoEnabled = selectedCustomerNames.isNotEmpty()
             )
         }
@@ -224,7 +224,9 @@ fun OrderItem(
                 shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {

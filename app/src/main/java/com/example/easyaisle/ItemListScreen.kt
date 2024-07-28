@@ -54,7 +54,7 @@ fun ImageFromUrl(url: String) {
         model = url,
         contentDescription = null,
         modifier = Modifier
-            .size(245.dp, 435.dp)
+            .size(50.dp, 50.dp)
             .padding(8.dp)
     )
 }
