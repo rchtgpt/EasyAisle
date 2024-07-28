@@ -36,6 +36,13 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -46,6 +53,9 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun MapRouteScreen(navController: NavController) {
+
+    var departClickCount by remember { mutableIntStateOf(0) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,7 +88,23 @@ fun MapRouteScreen(navController: NavController) {
                     .padding(16.dp)
             ) {
                 items(directions) { direction ->
-                    DirectionItem(direction)
+                    DirectionItem(
+                        direction = direction,
+                        onStartClick = { /* Handle Start click */ },
+                        onDepartClick = {
+                            when (departClickCount) {
+                                0 -> { /* Handle Depart 1 click */ }
+                                1 -> { /* Handle Depart 2 click */ }
+                                2 -> { /* Handle Depart 3 click */ }
+                                3 -> { /* Handle Depart 4 click */ }
+                                4 -> { /* Handle Depart 5 click */ }
+                                5 -> { /* Handle Depart 6 click */ }
+                                6 -> { /* Handle Depart 7 click */ }
+                            }
+                            departClickCount++
+                        },
+                        onFinishClick = { /* Handle Finish click */ }
+                    )
                 }
             }
         }
@@ -86,7 +112,12 @@ fun MapRouteScreen(navController: NavController) {
 }
 
 @Composable
-fun DirectionItem(direction: String) {
+fun DirectionItem(
+    direction: String,
+    onStartClick: () -> Unit,
+    onDepartClick: () -> Unit,
+    onFinishClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -100,11 +131,54 @@ fun DirectionItem(direction: String) {
             tint = Color.Black
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = direction,
-            color = Color.Black,
-            style = MaterialTheme.typography.bodyMedium
-        )
+        when {
+            direction == "START" -> {
+                Button(
+                    onClick = onStartClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = direction,
+                        color = Color(0xFFFFA500),
+                        modifier = Modifier
+                    )
+                }
+            }
+            direction == "DEPART" -> {
+                Button(
+                    onClick = onDepartClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = "NEXT",
+                        color = Color(0xFFFFA500),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            direction == "FINISH" -> {
+                Button(
+                    onClick = onFinishClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = "FINISH",
+                        color = Color(0xFFFFA500),
+                        modifier = Modifier
+                    )
+                }
+            }
+            else -> {
+                Text(
+                    text = direction,
+                    color = Color.Black,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }
 
@@ -115,129 +189,42 @@ fun getDirectionIcon(direction: String): ImageVector {
         direction.startsWith("Turn right") -> Icons.Default.ArrowForward
         direction.startsWith("Turn left") -> Icons.Default.ArrowBack
         direction.startsWith("Arrive") -> Icons.Default.LocationOn
-        direction.startsWith("Depart") -> Icons.Default.ExitToApp
-        direction.startsWith("Start") -> Icons.Default.PlayArrow
-        direction.startsWith("Finish") -> Icons.Default.CheckCircle
+        direction.startsWith("DEPART") -> Icons.Default.ExitToApp
+        direction.startsWith("START") -> Icons.Default.PlayArrow
+        direction.startsWith("FINISH") -> Icons.Default.CheckCircle
         else -> Icons.Default.ArrowForward
     }
 }
 
 val directions = listOf(
-    "Start",
+    "START",
     "Go forward 73 ft ~ < 1 min",
     "Turn right 11 ft ~ < 1 min",
     "Arrive, on the left",
-    "Depart",
+    "DEPART",
     "Go forward 53 ft ~ < 1 min",
     "Turn right 23 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 46 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward < 1 ft ~ < 1 min",
     "Turn right near bathroom 87 ft ~ < 1 min",
     "Turn left < 1 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 29 ft ~ < 1 min",
     "Arrive, on the left",
-    "Depart",
+    "DEPART",
     "Go forward 28 ft ~ < 1 min",
     "Turn left 28 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 6 ft ~ < 1 min",
     "Turn right 35 ft ~ < 1 min",
     "Arrive, on the right",
-    "Depart",
+    "DEPART",
     "Go forward 25 ft ~ < 1 min",
-    "Finish, on the left"
+    "FINISH"
 )
-
-// OLD CODE
-
-//Box(
-//modifier = Modifier.fillMaxSize()
-//) {
-//    Row(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(start = 48.dp, top = 12.dp, end = 48.dp, bottom = 12.dp),
-//        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.SpaceBetween
-//    ) {
-//        IconButton(onClick = { /* Handle left button click */ }) {
-//            Icon(
-//                painter = painterResource(id = R.drawable.big_arrow_left),
-//                contentDescription = "Previous"
-//            )
-//        }
-//
-//        Box(
-//            modifier = Modifier
-//                .size(200.dp)
-//                .background(
-//                    color = Color.White,
-//                    shape = RoundedCornerShape(16.dp)
-//                )
-//                .padding(16.dp)
-//        ) {
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(top = 8.dp)
-//            ) {
-//                Text(
-//                    text = "Corn Flakes",
-//                    fontSize = 20.sp,
-//                    fontWeight = FontWeight.SemiBold,
-//                    modifier = Modifier.align(Alignment.CenterHorizontally)
-//                )
-//
-//                Spacer(modifier = Modifier.height(8.dp))
-//
-//                Image(
-//                    painter = painterResource(id = R.drawable.uber_logo),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .size(125.dp)
-//                        .align(Alignment.CenterHorizontally),
-//                    contentScale = ContentScale.Crop
-//                )
-//            }
-//        }
-//
-//        IconButton(onClick = { /* Handle right button click */ }) {
-//            Icon(
-//                painter = painterResource(id = R.drawable.big_arrow_right),
-//                contentDescription = "Next"
-//            )
-//        }
-//    }
-//}
-
-// Black bar at the bottom
-//Text(
-//    text = "Amy (x1)  Paulette (x1)  Matt (x1)",
-//    fontSize = 20.sp,
-//    textAlign = TextAlign.Center,
-//    modifier = Modifier
-//    .fillMaxWidth()
-//    .background(Color.Black)
-//    .padding(8.dp),
-//    color = Color.White
-//)
-
-//@Composable
-//fun IconButton(onClick: () -> Unit, content: @Composable () -> Unit) {
-//    Box(
-//        modifier = Modifier
-//            .size(36.dp)
-//            .padding(0.dp)
-//            .clickable(onClick = onClick),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        content()
-//    }
-//}
