@@ -110,6 +110,7 @@ fun MyApp() {
         composable("homeScreen") { HomeScreen(navController) }
         composable("listScreen") { ItemList(navController) }
         composable("orderCompleteScreen") { OrderCompleteScreen(navController)}
+        composable("mapScreen") { MapRouteScreen(navController) }
     }
 }
 

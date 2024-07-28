@@ -62,7 +62,7 @@ fun ImageFromUrl(url: String) {
         model = url,
         contentDescription = null,
         modifier = Modifier
-            .size(245.dp, 435.dp)
+            .size(50.dp, 50.dp)
             .padding(8.dp)
     )
 }
@@ -107,9 +107,9 @@ fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
                 onHomeClick = { navController.navigate("homeScreen") },
                 onHelpClick = { /* Handle Help click */ },
                 onGoClick = {
-                    Log.d("jai mata di", "i'm inside")
-                    context.startActivity(intent)
-
+//                    Log.d("jai mata di", "i'm inside")
+//                    context.startActivity(intent)
+                        navController.navigate("mapScreen")
                 },
                 onSettingsClick = { /* Handle Settings click */ },
                 onProfileClick = { /* Handle Profile click */ },
