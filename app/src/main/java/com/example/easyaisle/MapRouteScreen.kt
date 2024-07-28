@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,9 +50,16 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 private fun setApiKey() {
     ArcGISEnvironment.apiKey = ApiKey.create("AAPTxy8BH1VEsoebNVZXo8HurARQG1ySTwuxT06quT27YX0dgRgL2iTC2RGhcTYanKpfuZhOI75rOh8AoqmEHbElaG53UKO9OPuDPj64JvJvXpO3kmzP-NQjXuG2VrRKdmSvzU7cXc0nF4NtqXLkxu9gqyAai3khLwDmVSHatvc1YXeCz04nVeYGCQu2lcT2GJ3XvkaYzKfZPPeS2vbEIqIfEP4nrDCTxdT-EWc8prmqsvw.AT1_r6BYalJ9")
@@ -71,13 +79,13 @@ fun createMap(): ArcGISMap {
     )
 
     return ArcGISMap(portalItem)
-
 }
 
 @Composable
 fun MapRouteScreen(navController: NavController) {
     val map = remember { createMap() }
-
+    val mapViewProxy = MapViewProxy()
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,9 +93,26 @@ fun MapRouteScreen(navController: NavController) {
     ) {
         // Grey box at the top -- Rachit --------
         MapView(
-            modifier = Modifier.fillMaxWidth().height(500.dp).padding(10.dp),
+            mapViewProxy = mapViewProxy,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(500.dp)
+                .padding(10.dp),
             arcGISMap = map
-        )
+        ) {
+            coroutineScope.launch {
+            map.load().onSuccess {
+                println("MAp got loaded")
+            }.onFailure {
+            }
+        }
+        }
+
+        Button(onClick = {
+            animateToStart(coroutineScope,mapViewProxy)
+        }) {
+           Text("Click me")
+        }
         // Grey box end -----------------
 
         // Column for yellow card with no padding
@@ -110,6 +135,29 @@ fun MapRouteScreen(navController: NavController) {
                 }
             }
         }
+    }
+}
+
+private fun animateToStart(
+    coroutineScope: CoroutineScope,
+    mapViewProxy: MapViewProxy
+) {
+    // val londonPoint = Point(-14093.0, 6711377.0, SpatialReference.webMercator())
+    val firstStop = Point(-13046046.900856, 4036399.683771, SpatialReference.webMercator())
+    val secondStop = Point(-13046036.3046, 4036419.0599, SpatialReference.webMercator())
+    val thirdStop = Point(-13046055.704331, 4036420.106326, SpatialReference.webMercator())
+    val fourthStop = Point(-13046056.506471, 4036433.74105, SpatialReference.webMercator())
+    val fifthStop = Point(-13046082.906481,4036433.35596, SpatialReference.webMercator())
+    val sixthStop = Point( -13046079.705261, 4036425.944223, SpatialReference.webMercator())
+    val seventhStop = Point(-13046071.040149,4036417.454062, SpatialReference.webMercator())
+    val eighthStop = Point(-13046069.302058,	4036406.718944, SpatialReference.webMercator())
+    val ninthStop = Point(-13046070.900848,	4036399.658887, SpatialReference.webMercator())
+
+
+    // create the viewpoint with the London point and scale
+    val viewpoint = Viewpoint(firstStop, 150.0)
+    coroutineScope.launch {
+        mapViewProxy.setViewpointAnimated(viewpoint, 2.seconds)
     }
 }
 
