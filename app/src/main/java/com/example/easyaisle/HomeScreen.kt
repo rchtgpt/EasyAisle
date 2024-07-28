@@ -2,9 +2,11 @@ package com.example.easyaisle
 
 import OrdersViewModel
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,17 +29,24 @@ import com.google.gson.reflect.TypeToken
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: OrdersViewModel, navController: NavController) {
+fun HomeScreen(navController: NavController) {
+    val viewModel: OrdersViewModel = viewModel(LocalContext.current as ComponentActivity)
     val esriFreshListOfOrders by viewModel.esriFreshListOfOrders.collectAsState()
     val costcoListOfOrders by viewModel.costcoListOfOrders.collectAsState()
     val traderJoesListOfOrders by viewModel.traderJoesListOfOrders.collectAsState()
+
+    //order selection
+    val selectedOrders by viewModel.selectedOrders.collectAsState()
+    val selectedCustomerNames by viewModel.selectedCustomerNames.collectAsState()
 
     // Define storeOrders dynamically, including the updated orders from ViewModel
     val storeOrders = listOf(
@@ -71,9 +80,14 @@ fun HomeScreen(viewModel: OrdersViewModel, navController: NavController) {
             CustomBottomNavBar(
                 onHomeClick = { /* Handle Home click */ },
                 onHelpClick = { /* Handle Search click */ },
-                onGoClick =  { navController.navigate("listScreen") },
+                onGoClick = {
+                    if (selectedCustomerNames.isNotEmpty()) {
+                        navController.navigate("listScreen")
+                    }
+                },
                 onSettingsClick = { /* Handle Profile click */ },
-                onProfileClick = { /* Handle Center Button click */ }
+                onProfileClick = { /* Handle Center Button click */ },
+                isGoEnabled = selectedCustomerNames.isNotEmpty()
             )
         }
     ) { innerPadding ->
@@ -88,7 +102,13 @@ fun HomeScreen(viewModel: OrdersViewModel, navController: NavController) {
                 )
         ) {
             items(storeOrders) { storeOrder ->
-                StoreOrderCard(storeOrder)
+                StoreOrderCard(
+                    storeOrder = storeOrder,
+                    selectedOrders = selectedOrders,
+                    onOrderSelected = { order ->
+                        viewModel.toggleOrderSelection(order, storeOrder.storeName)
+                    }
+                )
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
@@ -96,7 +116,11 @@ fun HomeScreen(viewModel: OrdersViewModel, navController: NavController) {
 }
 
 @Composable
-fun StoreOrderCard(storeOrder: StoreOrder) {
+fun StoreOrderCard(
+    storeOrder: StoreOrder,
+    selectedOrders: Set<String>,
+    onOrderSelected: (Order) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,8 +174,12 @@ fun StoreOrderCard(storeOrder: StoreOrder) {
                 Column(
                     modifier = Modifier.padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 ) {
-                    storeOrder.orders.forEachIndexed { _, order ->
-                        OrderItem(order)
+                    storeOrder.orders.forEach { order ->
+                        OrderItem(
+                            order = order,
+                            isSelected = selectedOrders.contains("${storeOrder.storeName}:${order.name}"),
+                            onOrderSelected = { onOrderSelected(order) }
+                        )
                     }
                 }
             }
@@ -160,13 +188,29 @@ fun StoreOrderCard(storeOrder: StoreOrder) {
 }
 
 @Composable
-fun OrderItem(order: Order) {
+fun OrderItem(
+    order: Order,
+    isSelected: Boolean,
+    onOrderSelected: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp)), // Add rounded corners to the parent card
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onOrderSelected() }
+            .offset(x = if (isSelected) (-4).dp else 0.dp, y = if (isSelected) (-4).dp else 0.dp)
+            .shadow(
+                elevation = if (isSelected) 6.dp else 2.dp,
+                shape = RoundedCornerShape(12.dp),
+                clip = false,
+                ambientColor = Color(0xFF0AAD0A),
+                spotColor = Color(0xFF0AAD0A)
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color.Yellow else Color.White
+        ),
+        border = if (isSelected) BorderStroke(4.dp, Color(0xFF0AAD0A)) else null,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
@@ -217,7 +261,7 @@ fun OrderItem(order: Order) {
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = "${order.name}",
+                            text = order.name,
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
                             ),
@@ -226,7 +270,7 @@ fun OrderItem(order: Order) {
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = "${order.address}",
+                            text = order.address,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black,
                             maxLines = 1,
@@ -285,20 +329,4 @@ data class Order(
             else -> R.drawable.instacart_icon // Default icon to avoid ResourceNotFoundException
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun OrderItemPreview() {
-    OrderItem(order = Order(
-        name = "Joe Albes",
-        address = "34 Park Street (6.2 Miles Away)",
-        platform = "Uber Eats",
-        time = "3:15 PM",
-        food_ordered = mapOf(
-            "Apples" to 6,
-            "Bananas" to 12
-        )
-    ).apply { setIconResId() })
-
 }

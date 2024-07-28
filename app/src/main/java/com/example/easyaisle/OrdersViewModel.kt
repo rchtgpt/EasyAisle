@@ -7,6 +7,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 class OrdersViewModel : ViewModel() {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -40,19 +43,14 @@ class OrdersViewModel : ViewModel() {
                     val gson = Gson()
                     val jsonString = gson.toJson(snapshot.value)
 
-                    // Define the type for the list of Order
                     val ordersListType = object : TypeToken<List<Order>>() {}.type
-
-                    // Convert the JSON string to a list of Order
                     val orders: List<Order>? = gson.fromJson(jsonString, ordersListType)
 
-                    // Update the state flow with the new list of orders
                     if (orders != null) {
-                        orders.forEach { it.setIconResId() } // Set the iconResId for each order
+                        orders.forEach { it.setIconResId() }
                         _esriFreshListOfOrders.value = orders
                     }
 
-                    // Print the list to verify
                     Log.d("Firebase Data", "EsriFresh Orders: ${_esriFreshListOfOrders.value}")
                 }
             }
@@ -70,19 +68,14 @@ class OrdersViewModel : ViewModel() {
                     val gson = Gson()
                     val jsonString = gson.toJson(snapshot.value)
 
-                    // Define the type for the list of Order
                     val ordersListType = object : TypeToken<List<Order>>() {}.type
-
-                    // Convert the JSON string to a list of Order
                     val orders: List<Order>? = gson.fromJson(jsonString, ordersListType)
 
-                    // Update the state flow with the new list of orders
                     if (orders != null) {
-                        orders.forEach { it.setIconResId() } // Set the iconResId for each order
+                        orders.forEach { it.setIconResId() }
                         _costcoListOfOrders.value = orders
                     }
 
-                    // Print the list to verify
                     Log.d("Firebase Data", "Costco Orders: ${_costcoListOfOrders.value}")
                 }
             }
@@ -100,19 +93,14 @@ class OrdersViewModel : ViewModel() {
                     val gson = Gson()
                     val jsonString = gson.toJson(snapshot.value)
 
-                    // Define the type for the list of Order
                     val ordersListType = object : TypeToken<List<Order>>() {}.type
-
-                    // Convert the JSON string to a list of Order
                     val orders: List<Order>? = gson.fromJson(jsonString, ordersListType)
 
-                    // Update the state flow with the new list of orders
                     if (orders != null) {
-                        orders.forEach { it.setIconResId() } // Set the iconResId for each order
+                        orders.forEach { it.setIconResId() }
                         _traderJoesListOfOrders.value = orders
                     }
 
-                    // Print the list to verify
                     Log.d("Firebase Data", "Trader Joes Orders: ${_traderJoesListOfOrders.value}")
                 }
             }
@@ -121,6 +109,41 @@ class OrdersViewModel : ViewModel() {
                 Log.w("Firebase Data", "loadPost:onCancelled", error.toException())
             }
         })
+    }
+
+    // Order selection
+    private val _selectedOrders = MutableStateFlow<Set<String>>(emptySet())
+    val selectedOrders: StateFlow<Set<String>> = _selectedOrders.asStateFlow()
+
+    private val _selectedCustomerNames = MutableStateFlow<List<String>>(emptyList())
+    val selectedCustomerNames: StateFlow<List<String>> = _selectedCustomerNames.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            selectedOrders.collect { names ->
+                Log.d("Jai Mata Di 1", names.toString())
+                _selectedCustomerNames.value = names.map { order ->
+                    order.substringAfter(':')
+                }
+                Log.d("Jai Mata Di 2", selectedCustomerNames.value.toString())
+            }
+        }
+    }
+
+    fun toggleOrderSelection(order: Order, storeName: String) {
+        val orderId = "$storeName:${order.name}"
+        _selectedOrders.update { currentSelection ->
+            if (orderId in currentSelection) {
+                currentSelection - orderId
+            } else {
+                currentSelection + orderId
+            }
+        }
+    }
+
+    fun clearSelection() {
+        _selectedOrders.value = emptySet()
+        _selectedCustomerNames.value = emptyList()
     }
 }
 

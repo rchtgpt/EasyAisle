@@ -1,6 +1,8 @@
-package com.example.easyaisle.ui.theme
+package com.example.easyaisle
 
 import OrdersViewModel
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,15 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.easyaisle.CustomBottomNavBar
-import com.example.easyaisle.Order
-import com.example.easyaisle.R
 import coil.compose.AsyncImage
 
 // LIST PAGE START -------------------------------
@@ -59,16 +60,28 @@ fun ImageFromUrl(url: String) {
 }
 
 @Composable
-fun ItemList(navController: NavController, viewModel: OrdersViewModel, persons: List<Person> = dummyData) {
+fun ItemList(navController: NavController, persons: List<Person> = dummyData) {
     val selectedUsersFromAGroceryStore: Array<String> = arrayOf("Matt Argos", "Paulette Mirez")
+    val viewModel: OrdersViewModel = viewModel(LocalContext.current as ComponentActivity)
+    val selectedCustomerNames by viewModel.selectedCustomerNames.collectAsState()
+    Log.d("Jai Mata Di 3", selectedCustomerNames.toString())
     val esriFreshListOfOrders by viewModel.esriFreshListOfOrders.collectAsState()
 
 
-    fun filterOrdersByName(names: Array<String> = selectedUsersFromAGroceryStore, orders: List<Order> = esriFreshListOfOrders): List<Order> {
+    fun filterOrdersByName(names: List<String> = selectedCustomerNames, orders: List<Order> = esriFreshListOfOrders): List<Order> {
         return orders.filter { it.name in names }
     }
 
     val filteredOrders = filterOrdersByName()
+    val totalItems = filteredOrders.sumOf { order -> order.food_ordered?.values?.sum() ?: 0 }
+
+    // Calculate the total number of unique food items
+        val uniqueItems = mutableSetOf<String>()
+        filteredOrders.forEach { order ->
+            order.food_ordered?.keys?.let { uniqueItems.addAll(it) }
+        }
+        val totalUniqueItems = uniqueItems.size
+
 
     Scaffold(
         topBar = {
@@ -82,10 +95,11 @@ fun ItemList(navController: NavController, viewModel: OrdersViewModel, persons: 
         bottomBar = {
             CustomBottomNavBar(
                 onHomeClick = { navController.navigate("homeScreen") },
-                onHelpClick = { /* Handle Search click */ },
-                onGoClick = { /* Handle Center Button click */ },
+                onHelpClick = { /* Handle Help click */ },
+                onGoClick = { /* Handle Go click */ },
                 onSettingsClick = { /* Handle Settings click */ },
-                onProfileClick = { /* Handle Profile click */ }
+                onProfileClick = { /* Handle Profile click */ },
+                isGoEnabled = selectedCustomerNames.isNotEmpty()
             )
         }
     ) { innerPadding ->
@@ -107,7 +121,7 @@ fun ItemList(navController: NavController, viewModel: OrdersViewModel, persons: 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "46 Items • 9 Stops",
+                    text = "${totalItems} Items • ${totalUniqueItems} Stops",
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold // Optional: for emphasis

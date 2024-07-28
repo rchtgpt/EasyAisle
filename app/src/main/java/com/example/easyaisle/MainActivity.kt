@@ -28,20 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
@@ -65,7 +58,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.easyaisle.ui.theme.ItemList
 import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
@@ -115,8 +107,8 @@ fun MyApp() {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "signInScreen") {
         composable("signInScreen") { SignInScreen(navController) }
-        composable("homeScreen") { HomeScreen(OrdersViewModel(), navController) }
-        composable("listScreen") { ItemList(navController, OrdersViewModel()) }
+        composable("homeScreen") { HomeScreen(navController) }
+        composable("listScreen") { ItemList(navController) }
     }
 }
 
@@ -152,7 +144,8 @@ fun CustomBottomNavBar(
     onHelpClick: () -> Unit,
     onGoClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    isGoEnabled: Boolean
 ) {
     val cutoutRadius = with(LocalDensity.current) { 45.dp.toPx() }
     val cutoutHeightPx = with(LocalDensity.current) { 28.dp.toPx() }
@@ -204,9 +197,13 @@ fun CustomBottomNavBar(
 
         // Floating Action Button
         FloatingActionButton(
-            onClick = onGoClick,
+            onClick = {
+                if (isGoEnabled) {
+                    onGoClick()
+                }
+            },
             shape = CircleShape,
-            containerColor = Color(0xFFFF9600), // Adjust color as needed
+            containerColor = if (isGoEnabled) Color(0xFFFF9800) else Color.Gray,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = -30.dp)
